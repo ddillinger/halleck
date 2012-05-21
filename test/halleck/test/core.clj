@@ -1,5 +1,5 @@
-(ns halleck.test.core
-  (:use [halleck.core])
+(ns hallex.test.core
+  (:use [hallex.core])
   (:use [clojure.test]))
 
 (deftest replace-me ;; FIXME: write

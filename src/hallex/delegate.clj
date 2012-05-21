@@ -1,4 +1,4 @@
-(ns halleck.delegate)
+(ns hallex.delegate)
 
 (defn code-gen [c excludes form]
   (apply

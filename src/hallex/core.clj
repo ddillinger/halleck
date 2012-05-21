@@ -1,10 +1,10 @@
-(ns halleck.core
+(ns hallex.core
   (:require [clojure.java.io :as io]
-            [halleck.delegate :refer [delegate]]))
+            [hallex.delegate :refer [delegate]]))
 
 (delegate {org.apache.log4j.FileAppender (.state this)}
           #{doAppend}
-          (gen-class :name halleck.Appender
+          (gen-class :name hallex.Appender
                      :implements [org.apache.log4j.Appender
                                   org.apache.log4j.spi.OptionHandler]
                      :constructors {[] []
@@ -61,48 +61,30 @@
              start 0
              place 0]
         (cond
-          (= -1 n) index
-          (and (= (char n) \newline)
-               (= (char n-1) \%)
-               (= (char n) \newline))
-          (do
-            (.add index [f start (- (- place 2) start)])
-            (recur (.read fins)
-                   n
-                   n-1
-                   (inc place)
-                   (inc place)))
-          :else
-          (recur (.read fins)
-                 n
-                 n-1
-                 start
-                 (inc place)))))))
+         (= -1 n) index
+         (and (= (char n) \newline)
+              (= (char n-1) \%)
+              (= (char n) \newline))
+         (do
+           (.add index [f start (- (- place 2) start)])
+           (recur (.read fins)
+                  n
+                  n-1
+                  (inc place)
+                  (inc place)))
+         :else
+         (recur (.read fins)
+                n
+                n-1
+                start
+                (inc place)))))))
 
-(def places (.toArray (index (io/resource "fortunes"))))
-
-(defn random-place []
-  (aget places (rand-int (count places))))
-
-;; (defn random-fortune []
-;;   (let [[file start length] (random-place)]
-;;     (with-open [fins (java.io.FileInputStream. file)
-;;                 fc (.getChannel fins)]
-;;       (.trim (.toString
-;;               (.decode
-;;                (java.nio.charset.Charset/forName "utf8")
-;;                (.map fc
-;;                      java.nio.channels.FileChannel$MapMode/READ_ONLY
-;;                      start
-;;                      length)))))))
-
-(defn random-fortune []
-  (let [[file start length] (random-place)]
-    (with-open [fins (io/input-stream file)]
-      (.skip fins start)
-      (let [b (byte-array length)]
-        (.read fins b 0 length)
-        (.trim (String. b "utf8"))))))
+(defn random-wub []
+  (apply str (interpose " "
+                        (map #(if (= 0 (rand-int 3))
+                                (.toUpperCase %)
+                                %)
+                             (take (inc (rand-int 50)) (repeat "wub"))))))
 
 (defn -doAppend [this event]
   (.doAppend (.state this) event)
@@ -114,5 +96,5 @@
                   event
                   :throw-info nil
                   :message
-                  (str "\n" (random-fortune))))
+                  (random-wub)))
       (catch Exception _))))
